@@ -30,6 +30,11 @@ class FullScreenImageCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        print("FullScreenImageCell: in layoutSubviews height: \(bounds.height)")
+    }
+
     override func prepareForReuse() {
         imageView.image = nil
     }

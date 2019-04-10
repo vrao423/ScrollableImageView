@@ -25,7 +25,9 @@ class SpaceView: UIView {
     @objc func toggleSpace(sender: UIButton) {
         expanded = !expanded
         sender.setTitle(expanded ? "Collapse" : "Expand", for: .normal)
+        
         invalidateIntrinsicContentSize()
+        self.superview!.setNeedsLayout()
     }
 
     override var intrinsicContentSize: CGSize {

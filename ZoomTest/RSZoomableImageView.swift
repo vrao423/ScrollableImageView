@@ -130,7 +130,7 @@ class RSZoomableImageView: UIScrollView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        print("RSZoomableImageView: layoutSubView bounds: \(bounds)")
+        print("RSZoomableImageView: layoutSubView height: \(bounds.height)")
     }
 }
 

@@ -24,18 +24,6 @@ class FullScreenImageViewController: UIViewController {
 
     private let cellIdentifier = "FullScreenImageCellIdentifier"
 
-    private func createFetchResults() -> PHFetchResult<PHAsset>?  {
-        guard PHPhotoLibrary.authorizationStatus() == .authorized else { return nil }
-
-        let collectionsResult = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumUserLibrary, options: nil)
-
-        let options = PHFetchOptions()
-        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-        options.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
-
-        return PHAsset.fetchAssets(in: collectionsResult[0], options: options)
-    }
-
     // just basic initialization here
     override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
 
@@ -43,12 +31,17 @@ class FullScreenImageViewController: UIViewController {
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 0.0
         layout.minimumLineSpacing = 0.0
-        layout.sectionInset = .zero
+//        layout.sectionInset = .zero
 
         collectionView = RSCollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.contentInsetAdjustmentBehavior = .never
         collectionView.isPagingEnabled = true
 
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func viewDidLoad() {
@@ -89,10 +82,6 @@ class FullScreenImageViewController: UIViewController {
         spaceView.isHidden = !showSpace
     }
 
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     // loading fetch resutls here
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -109,11 +98,12 @@ class FullScreenImageViewController: UIViewController {
             }
         } else if PHPhotoLibrary.authorizationStatus() == .authorized {
             results = createFetchResults()
+            // Do I need to call both?
             collectionView.reloadData()
             collectionView.collectionViewLayout.invalidateLayout()
         }
 
-        print("size: \(self.collectionView.bounds.size) inset: \(self.collectionView.adjustedContentInset)")
+        print("viewDidAppear: size: \(self.collectionView.bounds.size) inset: \(self.collectionView.adjustedContentInset)")
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -161,6 +151,18 @@ class FullScreenImageViewController: UIViewController {
             cell.imageView.updateZoomScale()
         }
     }
+
+    private func createFetchResults() -> PHFetchResult<PHAsset>?  {
+        guard PHPhotoLibrary.authorizationStatus() == .authorized else { return nil }
+
+        let collectionsResult = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumUserLibrary, options: nil)
+
+        let options = PHFetchOptions()
+        options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        options.predicate = NSPredicate(format: "mediaType = %d", PHAssetMediaType.image.rawValue)
+
+        return PHAsset.fetchAssets(in: collectionsResult[0], options: options)
+    }
 }
 
 extension FullScreenImageViewController: UICollectionViewDataSource {
@@ -198,20 +200,20 @@ extension FullScreenImageViewController: UICollectionViewDelegate {
 
 extension FullScreenImageViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        print("in size, collection view size: \(collectionView.bounds.size)")
+        print("in sizeForItemAt, collection view height: \(collectionView.bounds.height)")
         return CGSize(width: collectionView.bounds.width,
                       height: collectionView.bounds.height)
     }
 
- //uncomment this to remove space from bottom on launch, not sure why I have substract 5.0
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: 0.0, left: 0.0, bottom: 0.0, right: 0.0)
-    }
+// //uncomment this to remove space from bottom on launch, not sure why I have substract 5.0
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+//        return UIEdgeInsets(top: 44.0, left: 0.0, bottom: 0.0, right: 0.0)
+//    }
 }
 
 class CustomLayout: UICollectionViewFlowLayout {
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        print("in should invalidate, new bounds: \(newBounds.size)")
+        print("in should invalidate, new height: \(newBounds.height)")
         return true
     }
 }
@@ -219,6 +221,6 @@ class CustomLayout: UICollectionViewFlowLayout {
 class RSCollectionView: UICollectionView {
     override func layoutSubviews() {
         super.layoutSubviews()
-        print("RSCollectionView: layoutSubviews bounds: \(bounds)")
+        print("RSCollectionView: layoutSubviews height: \(bounds.height)")
     }
 }
